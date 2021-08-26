@@ -1,10 +1,20 @@
 # This file is app/controllers/movies_controller.rb
 class MoviesController < ApplicationController
+
+  def all_ratings
+    ['G','PG','PG-13','R','NC-17']
+  end
+
   def index
+    @all_ratings = all_ratings
+    @selected_ratings = []
     if params[:sort_by] == "title"
       @movies = Movie.order(:title)
     elsif params[:sort_by] == "release_date"
       @movies = Movie.order(:release_date)
+    elsif params.has_key?(:ratings) and !params[:ratings].empty?
+      @selected_ratings = params[:ratings].keys
+      @movies = Movie.where(rating: @selected_ratings)
     else
       @movies = Movie.all
     end
@@ -51,3 +61,4 @@ class MoviesController < ApplicationController
     redirect_to movies_path
   end
 end
+
