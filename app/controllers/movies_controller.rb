@@ -7,16 +7,30 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = all_ratings
-    @selected_ratings = []
-    if params[:sort_by] == "title"
-      @movies = Movie.order(:title)
-    elsif params[:sort_by] == "release_date"
-      @movies = Movie.order(:release_date)
-    elsif params.has_key?(:ratings) and !params[:ratings].empty?
+    @selected_ratings = @all_ratings
+
+    if(session.has_key?(:sort_by) and !params.has_key?(:sort_by))
+      params[:sort_by] = session[:sort_by]
+    end
+    if(session.has_key?(:ratings) and !params.has_key?(:ratings))
+      params[:ratings] = session[:ratings]
+    end
+
+    #faz o select de todos que precisa
+    if params.has_key?(:ratings) and !params[:ratings].empty?
       @selected_ratings = params[:ratings].keys
       @movies = Movie.where(rating: @selected_ratings)
+      session[:ratings] = Hash[@selected_ratings.map {|x| [x, 1]}]
     else
       @movies = Movie.all
+    end
+
+    if params[:sort_by] == "title"
+      @movies = @movies.order(:title)
+      session[:sort_by] = "title"
+    elsif params[:sort_by] == "release_date"
+      @movies = @movies.order(:release_date)
+      session[:sort_by] = "release_date"
     end
   end
 
